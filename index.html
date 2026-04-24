@@ -560,7 +560,11 @@
     }
     rows = rows.filter(r => unit==='imperial' ? r.inDisp : r.mmDisp);
     if(rows.length === 0){
-      sel.innerHTML = '<option value="">Coming soon</option>';
+      // Differentiate: imperial OD with no ID picked = "Choose an ID first"; everything else = "Coming soon"
+      const emptyLabel = (id === 'odSel' && unit === 'imperial' && !document.getElementById('idSel').value)
+        ? 'Choose an ID first'
+        : 'Coming soon';
+      sel.innerHTML = '<option value="">'+emptyLabel+'</option>';
       sel.disabled = true;
       return;
     }
