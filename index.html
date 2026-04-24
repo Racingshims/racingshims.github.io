@@ -304,56 +304,42 @@
           </div>
         </div>
 
+        <div class="field">
+          <label>2. Units</label>
+          <div class="shape-toggle" role="radiogroup" aria-label="Measurement units">
+            <button type="button" class="shape-opt" data-unit="metric" aria-pressed="true">
+              <div><div class="n">Metric</div><div class="d">millimeters</div></div>
+            </button>
+            <button type="button" class="shape-opt" data-unit="imperial" aria-pressed="false">
+              <div><div class="n">Imperial</div><div class="d">inches</div></div>
+            </button>
+          </div>
+        </div>
+
         <div class="two-col">
           <div class="field">
-            <label>2. Inner diameter</label>
+            <label>3. Inner diameter</label>
             <div class="select-wrap">
-              <select id="idSel">
-                <option value="">Choose ID</option>
-                <option value="8">8 mm</option>
-                <option value="10">10 mm</option>
-                <option value="12">12 mm</option>
-                <option value="14">14 mm</option>
-                <option value="16">16 mm</option>
-              </select>
+              <select id="idSel"></select>
             </div>
           </div>
           <div class="field">
-            <label>3. Outer diameter</label>
+            <label>4. Outer diameter</label>
             <div class="select-wrap">
-              <select id="odSel">
-                <option value="">Choose OD</option>
-                <option value="20">20 mm</option>
-                <option value="24">24 mm</option>
-                <option value="28">28 mm</option>
-                <option value="32">32 mm</option>
-                <option value="36">36 mm</option>
-                <option value="40">40 mm</option>
-                <option value="44">44 mm</option>
-                <option value="48">48 mm</option>
-                <option value="50">50 mm</option>
-                <option value="55">55 mm</option>
-              </select>
+              <select id="odSel"></select>
             </div>
           </div>
         </div>
 
         <div class="field">
-          <label>4. Thickness</label>
+          <label>5. Thickness</label>
           <div class="select-wrap">
-            <select id="thSel">
-              <option value="">Choose thickness</option>
-              <option value="0.10">0.10 mm</option>
-              <option value="0.15">0.15 mm</option>
-              <option value="0.20">0.20 mm</option>
-              <option value="0.25">0.25 mm</option>
-              <option value="0.30">0.30 mm</option>
-            </select>
+            <select id="thSel"></select>
           </div>
         </div>
 
         <div class="field">
-          <label>5. Quantity</label>
+          <label>6. Quantity</label>
           <div class="qty">
             <button type="button" aria-label="Decrease" onclick="changeQty(-1)">−</button>
             <input id="qtyInput" type="number" min="1" max="500" value="1" inputmode="numeric" />
@@ -474,15 +460,77 @@
 
   // Shape toggle
   let shape = 'valve';
-  document.querySelectorAll('.shape-opt').forEach(btn=>{
+  document.querySelectorAll('[data-shape]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.shape-opt').forEach(b=>b.setAttribute('aria-pressed','false'));
+      document.querySelectorAll('[data-shape]').forEach(b=>b.setAttribute('aria-pressed','false'));
       btn.setAttribute('aria-pressed','true');
       shape = btn.dataset.shape;
       document.getElementById('sumShape').textContent = shape === 'valve' ? 'Valve' : 'Bleed';
       computePrice();
     });
   });
+
+  // Unit toggle — canonical value is always mm; display text switches to inches when imperial
+  let unit = 'metric';
+  const DIMS = {
+    idSel: {
+      placeholder: 'Choose ID',
+      rows: [
+        {mm:8,  inDisp:'0.315"', mmDisp:'8 mm'},
+        {mm:10, inDisp:'0.394"', mmDisp:'10 mm'},
+        {mm:12, inDisp:'0.472"', mmDisp:'12 mm'},
+        {mm:14, inDisp:'0.551"', mmDisp:'14 mm'},
+        {mm:16, inDisp:'0.630"', mmDisp:'16 mm'},
+      ]
+    },
+    odSel: {
+      placeholder: 'Choose OD',
+      rows: [
+        {mm:20, inDisp:'0.787"', mmDisp:'20 mm'},
+        {mm:24, inDisp:'0.945"', mmDisp:'24 mm'},
+        {mm:28, inDisp:'1.102"', mmDisp:'28 mm'},
+        {mm:32, inDisp:'1.260"', mmDisp:'32 mm'},
+        {mm:36, inDisp:'1.417"', mmDisp:'36 mm'},
+        {mm:40, inDisp:'1.575"', mmDisp:'40 mm'},
+        {mm:44, inDisp:'1.732"', mmDisp:'44 mm'},
+        {mm:48, inDisp:'1.890"', mmDisp:'48 mm'},
+        {mm:50, inDisp:'1.969"', mmDisp:'50 mm'},
+        {mm:55, inDisp:'2.165"', mmDisp:'55 mm'},
+      ]
+    },
+    thSel: {
+      placeholder: 'Choose thickness',
+      rows: [
+        {mm:0.10, inDisp:'0.004"', mmDisp:'0.10 mm'},
+        {mm:0.15, inDisp:'0.006"', mmDisp:'0.15 mm'},
+        {mm:0.20, inDisp:'0.008"', mmDisp:'0.20 mm'},
+        {mm:0.25, inDisp:'0.010"', mmDisp:'0.25 mm'},
+        {mm:0.30, inDisp:'0.012"', mmDisp:'0.30 mm'},
+      ]
+    }
+  };
+  function populateSelect(id){
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    const cfg = DIMS[id];
+    sel.innerHTML = '<option value="">'+cfg.placeholder+'</option>' +
+      cfg.rows.map(r=>'<option value="'+r.mm+'">'+(unit==='imperial'?r.inDisp:r.mmDisp)+'</option>').join('');
+    if(prev) sel.value = prev;
+  }
+  function refreshUnits(){
+    ['idSel','odSel','thSel'].forEach(populateSelect);
+    computePrice();
+  }
+  document.querySelectorAll('[data-unit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-unit]').forEach(b=>b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+      unit = btn.dataset.unit;
+      refreshUnits();
+    });
+  });
+  // Populate selects once now; computePrice() at bottom of script handles first render
+  ['idSel','odSel','thSel'].forEach(populateSelect);
 
   // Quantity
   const qtyInput = document.getElementById('qtyInput');
@@ -514,21 +562,25 @@
   }
   function computePrice(){
     const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
-    const unit = unitPrice();
-    const total = unit * qty;
+    const perShim = unitPrice();
+    const total = perShim * qty;
     const freeShip = total >= 100;
 
+    const selDisplay = (id)=>{
+      const s = document.getElementById(id);
+      return s.value ? s.options[s.selectedIndex].text : '—';
+    };
     document.getElementById('sumQty').textContent = qty;
-    document.getElementById('sumID').textContent  = document.getElementById('idSel').value ? document.getElementById('idSel').value + ' mm' : '—';
-    document.getElementById('sumOD').textContent  = document.getElementById('odSel').value ? document.getElementById('odSel').value + ' mm' : '—';
-    document.getElementById('sumTh').textContent  = document.getElementById('thSel').value ? parseFloat(document.getElementById('thSel').value).toFixed(2) + ' mm' : '—';
-    document.getElementById('sumUnit').textContent = unit ? '$' + unit.toFixed(2) : '—';
+    document.getElementById('sumID').textContent  = selDisplay('idSel');
+    document.getElementById('sumOD').textContent  = selDisplay('odSel');
+    document.getElementById('sumTh').textContent  = selDisplay('thSel');
+    document.getElementById('sumUnit').textContent = perShim ? '$' + perShim.toFixed(2) : '—';
     document.getElementById('priceNum').textContent = total.toFixed(2);
     document.getElementById('priceEach').textContent = qty === 1 ? '/shim' : '/pack of ' + qty + (freeShip ? ' · free shipping' : '');
 
     // shipping hint
     const hint = document.getElementById('bulkHint');
-    if(!unit) hint.textContent = 'Orders $100+ ship free.';
+    if(!perShim) hint.textContent = 'Orders $100+ ship free.';
     else if(freeShip) hint.textContent = '✓ Free shipping unlocked ($100+).';
     else hint.textContent = '$' + (100 - total).toFixed(2) + ' more for free shipping.';
   }
@@ -536,8 +588,8 @@
 
   // Add to cart (stub)
   document.getElementById('addBtn').addEventListener('click', ()=>{
-    const unit = unitPrice();
-    if(!unit){ alert('Pick an inner diameter, outer diameter, and thickness first.'); return; }
+    const perShim = unitPrice();
+    if(!perShim){ alert('Pick an inner diameter, outer diameter, and thickness first.'); return; }
     alert('Preview build — cart/checkout not wired yet. Shopify integration lands once the real catalog drops.');
   });
 </script>
