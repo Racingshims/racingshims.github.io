@@ -562,7 +562,7 @@
     if(rows.length === 0){
       // Differentiate: imperial OD with no ID picked = "Choose an ID first"; everything else = "Coming soon"
       const emptyLabel = (id === 'odSel' && unit === 'imperial' && !document.getElementById('idSel').value)
-        ? 'Choose an ID first'
+        ? 'Choose ID first'
         : 'Coming soon';
       sel.innerHTML = '<option value="">'+emptyLabel+'</option>';
       sel.disabled = true;
