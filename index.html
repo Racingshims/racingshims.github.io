@@ -321,11 +321,11 @@
         <div class="field">
           <label>2. Units</label>
           <div class="shape-toggle" role="radiogroup" aria-label="Measurement units">
-            <button type="button" class="shape-opt" data-unit="metric" aria-pressed="true">
-              <div><div class="n">Metric</div><div class="d">millimeters</div></div>
-            </button>
-            <button type="button" class="shape-opt" data-unit="imperial" aria-pressed="false">
+            <button type="button" class="shape-opt" data-unit="imperial" aria-pressed="true">
               <div><div class="n">Imperial</div><div class="d">inches</div></div>
+            </button>
+            <button type="button" class="shape-opt" data-unit="metric" aria-pressed="false">
+              <div><div class="n">Metric</div><div class="d">coming soon</div></div>
             </button>
           </div>
         </div>
@@ -503,14 +503,15 @@
     });
   });
 
-  // Unit toggle — canonical value is always mm; display text switches to inches when imperial
-  let unit = 'metric';
+  // Unit toggle — canonical value is always mm; display text switches to inches when imperial.
+  // Metric is intentionally "coming soon" across the board for now (null mmDisp = filtered out in metric mode).
+  let unit = 'imperial';
   const DIMS = {
     idSel: {
       placeholder: 'Choose ID',
       rows: [
-        {mm:8,    inDisp:'0.315"', mmDisp:'8 mm'},
-        {mm:12.7, inDisp:'0.500"', mmDisp:'12 mm'},
+        {mm:8,    inDisp:'0.315"', mmDisp:null},
+        {mm:12.7, inDisp:'0.500"', mmDisp:null},
       ]
     },
     odSel: {
@@ -537,11 +538,11 @@
     thSel: {
       placeholder: 'Choose thickness',
       rows: [
-        {mm:0.10, inDisp:'0.004"', mmDisp:'0.10 mm'},
-        {mm:0.15, inDisp:'0.006"', mmDisp:'0.15 mm'},
-        {mm:0.20, inDisp:'0.008"', mmDisp:'0.20 mm'},
-        {mm:0.25, inDisp:'0.010"', mmDisp:'0.25 mm'},
-        {mm:0.30, inDisp:'0.012"', mmDisp:'0.30 mm'},
+        {mm:0.10, inDisp:'0.004"', mmDisp:null},
+        {mm:0.15, inDisp:'0.006"', mmDisp:null},
+        {mm:0.20, inDisp:'0.008"', mmDisp:null},
+        {mm:0.25, inDisp:'0.010"', mmDisp:null},
+        {mm:0.30, inDisp:'0.012"', mmDisp:null},
       ]
     }
   };
