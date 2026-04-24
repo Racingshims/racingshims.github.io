@@ -537,12 +537,16 @@
     },
     thSel: {
       placeholder: 'Choose thickness',
+      // `onlyForOD` (optional) restricts the thickness to specific OD canonical mm values
       rows: [
-        {mm:0.10, inDisp:'0.004"', mmDisp:null},
-        {mm:0.15, inDisp:'0.006"', mmDisp:null},
-        {mm:0.20, inDisp:'0.008"', mmDisp:null},
-        {mm:0.25, inDisp:'0.010"', mmDisp:null},
-        {mm:0.30, inDisp:'0.012"', mmDisp:null},
+        {mm:0.1016, inDisp:'0.004"', mmDisp:null},
+        {mm:0.1524, inDisp:'0.006"', mmDisp:null},
+        {mm:0.2032, inDisp:'0.008"', mmDisp:null},
+        {mm:0.2540, inDisp:'0.010"', mmDisp:null},
+        {mm:0.3048, inDisp:'0.012"', mmDisp:null},
+        {mm:0.3810, inDisp:'0.015"', mmDisp:null},
+        {mm:0.5080, inDisp:'0.020"', mmDisp:null},
+        {mm:0.7620, inDisp:'0.030"', mmDisp:null, onlyForOD:[10.998, 15.748]},
       ]
     }
   };
@@ -555,6 +559,13 @@
       // OD depends on which ID is currently selected
       const currentID = document.getElementById('idSel').value;
       rows = (currentID && cfg.rowsByID[currentID]) ? cfg.rowsByID[currentID] : [];
+    } else if(id === 'thSel'){
+      // Some thicknesses are restricted to specific ODs (via `onlyForOD`)
+      const currentOD = parseFloat(document.getElementById('odSel').value);
+      rows = cfg.rows.filter(r => {
+        if(!r.onlyForOD) return true;
+        return currentOD && r.onlyForOD.some(od => Math.abs(od - currentOD) < 1e-6);
+      });
     } else {
       rows = cfg.rows;
     }
@@ -597,10 +608,16 @@
     computePrice();
   }
   qtyInput.addEventListener('input', computePrice);
-  ['odSel','thSel'].forEach(id=>document.getElementById(id).addEventListener('change', computePrice));
-  // ID drives which ODs are available — repopulate OD on ID change
+  document.getElementById('thSel').addEventListener('change', computePrice);
+  // ID drives which ODs are available — repopulate OD (and therefore thickness) on ID change
   document.getElementById('idSel').addEventListener('change', ()=>{
     populateSelect('odSel');
+    populateSelect('thSel');
+    computePrice();
+  });
+  // OD drives which thicknesses are available (e.g. 0.030" only with 0.433" / 0.620")
+  document.getElementById('odSel').addEventListener('change', ()=>{
+    populateSelect('thSel');
     computePrice();
   });
 
