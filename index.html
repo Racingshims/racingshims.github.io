@@ -117,7 +117,7 @@
     display:grid;grid-template-columns:1.05fr 1fr;background:var(--paper);
   }
   @media (max-width:900px){ .config{grid-template-columns:1fr} }
-  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:18px;order:2}
+  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:18px;order:1}
   .config-left .label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.7}
   .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(56px,8vw,96px);line-height:.9}
 
@@ -143,7 +143,7 @@
   .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
   .config-left .summary strong{font-weight:600}
   .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
-  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px;order:1}
+  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px;order:2}
 
   .field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--steel);margin-bottom:10px}
 
@@ -808,40 +808,63 @@
     // and pushes a circular hole for the inner diameter.
     function makeShimShape(outerR, innerR, notchCount){
       const shape = new THREE.Shape();
-      const SEGMENTS = 256;
+      const SEGMENTS = 384;
 
       // Notch geometry params (relative to outer radius so it scales with size)
       const notchDepth = outerR * 0.06;
       const notchAngularWidth = 0.09; // radians (~5.1°) for a full notch
 
-      // Evenly-spaced notches. 0.5 = one half-width notch.
-      const notches = [];
+      // Notch centers. 0.5 = a single half-width notch at angle 0.
+      const centers = [];
+      let halfNotch = false;
       if(notchCount === 0.5){
-        notches.push({ angle: 0, width: notchAngularWidth * 0.5 });
+        centers.push(0);
+        halfNotch = true;
       } else if(notchCount > 0){
         for(let i = 0; i < notchCount; i++){
-          notches.push({ angle: (i / notchCount) * Math.PI * 2, width: notchAngularWidth });
+          centers.push((i / notchCount) * Math.PI * 2);
         }
       }
+      const effectiveWidth = halfNotch ? notchAngularWidth * 0.5 : notchAngularWidth;
+      const halfW = effectiveWidth / 2;
 
-      // Sweep outer contour
-      for(let s = 0; s <= SEGMENTS; s++){
-        const a = (s / SEGMENTS) * Math.PI * 2;
-        let r = outerR;
-        for(const n of notches){
-          // shortest signed distance between a and n.angle, wrapped into [-PI, PI]
-          let d = a - n.angle;
+      // True if angle `a` is inside any notch (shortest-arc distance < halfW)
+      function inNotch(a){
+        for(const c of centers){
+          let d = a - c;
           d = Math.atan2(Math.sin(d), Math.cos(d));
-          if(Math.abs(d) < n.width / 2){
-            // Smooth the notch bottom slightly so the cut doesn't render as a hard spike
-            const t = Math.abs(d) / (n.width / 2);  // 0 at notch center, 1 at notch edge
-            r = outerR - notchDepth * (1 - t * t);
-            break;
-          }
+          if(Math.abs(d) < halfW) return true;
         }
-        const x = Math.cos(a) * r;
-        const y = Math.sin(a) * r;
-        if(s === 0) shape.moveTo(x, y);
+        return false;
+      }
+
+      // Sweep outer contour. When we cross a notch boundary, emit TWO vertices at the
+      // same angle (different radii) so the side wall is perfectly radial — gives a
+      // rectangular notch with 90° walls.
+      const pts = [];
+      let prevInside = inNotch(0);
+      let prevR = prevInside ? outerR - notchDepth : outerR;
+      pts.push({ a: 0, r: prevR });
+
+      for(let s = 1; s <= SEGMENTS; s++){
+        const a = (s / SEGMENTS) * Math.PI * 2;
+        const nowInside = inNotch(a);
+        if(nowInside !== prevInside){
+          // Boundary crossing: emit radial wall (two points at same angle, different r)
+          pts.push({ a, r: prevR });
+          const newR = nowInside ? outerR - notchDepth : outerR;
+          pts.push({ a, r: newR });
+          prevR = newR;
+        } else {
+          pts.push({ a, r: prevR });
+        }
+        prevInside = nowInside;
+      }
+
+      for(let i = 0; i < pts.length; i++){
+        const x = Math.cos(pts[i].a) * pts[i].r;
+        const y = Math.sin(pts[i].a) * pts[i].r;
+        if(i === 0) shape.moveTo(x, y);
         else shape.lineTo(x, y);
       }
 
