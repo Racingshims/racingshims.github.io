@@ -45,6 +45,12 @@
   a{color:inherit;text-decoration:none}
   button{font-family:inherit}
 
+  /* ANNOUNCE BAR */
+  .announce{background:var(--ink);color:var(--paper);font-size:13px;letter-spacing:.02em;padding:10px 0}
+  .announce .container{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center}
+  .announce a{color:var(--paper);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+  .announce a:hover{text-decoration:none}
+
   /* NAV */
   .nav{
     position:sticky;top:0;z-index:50;
@@ -225,6 +231,13 @@
 
 <div class="placeholder-banner">Preview build — pricing &amp; catalog are placeholders. Real catalog lands 2026-04-24.</div>
 
+<div class="announce">
+  <div class="container">
+    <span>Don't see your spec?</span>
+    <a href="#custom">We build custom shims →</a>
+  </div>
+</div>
+
 <nav class="nav">
   <div class="container nav-inner">
     <a href="#top" class="brand">
@@ -233,6 +246,7 @@
     </a>
     <div class="nav-links">
       <a href="#shop">Shop</a>
+      <a href="#custom">Custom</a>
       <a href="#how">How it works</a>
       <a href="#about">About</a>
       <a href="#faq">FAQ</a>
@@ -353,6 +367,25 @@
           Add to cart
         </button>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="custom" class="sec" style="background:var(--fog)">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">Custom shims</div>
+        <h2 style="margin-top:10px">Don't see your spec?<br/>We'll build it.</h2>
+      </div>
+    </div>
+    <div class="reveal" style="max-width:680px">
+      <p style="font-size:17px;line-height:1.55">If the size you need isn't in the configurator, we can run it custom. Heads up — custom shims cost more than stocked sizes and take longer to ship while we machine them to your spec.</p>
+      <p style="font-size:17px;line-height:1.55;margin-top:14px">Send us your <strong>shape, inner diameter, outer diameter, thickness, and quantity</strong> and we'll come back with a quote and lead time.</p>
+      <a class="btn-primary" href="mailto:custom@racingshims.com?subject=Custom%20shim%20quote&body=Shape%3A%20%0AInner%20diameter%3A%20%0AOuter%20diameter%3A%20%0AThickness%3A%20%0AQuantity%3A%20%0A" style="margin-top:24px;display:inline-flex">
+        Request a custom quote
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
     </div>
   </div>
 </section>
