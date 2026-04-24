@@ -11,6 +11,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
 <style>
   :root{
     --ink:#000000;
@@ -108,9 +117,27 @@
     display:grid;grid-template-columns:1.05fr 1fr;background:var(--paper);
   }
   @media (max-width:900px){ .config{grid-template-columns:1fr} }
-  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:20px;order:2}
+  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:18px;order:2}
   .config-left .label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.7}
-  .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(72px,10vw,120px);line-height:.9}
+  .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(56px,8vw,96px);line-height:.9}
+
+  /* 3D shim viewer */
+  .shim-viewer{
+    position:relative;width:100%;aspect-ratio:16/11;max-height:280px;
+    background:radial-gradient(ellipse at center, #1a1a1a 0%, #000 75%);
+    border-radius:14px;overflow:hidden;cursor:grab;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .shim-viewer:active{cursor:grabbing}
+  .shim-viewer canvas{display:block;width:100%!important;height:100%!important}
+  .shim-viewer .viewer-hint{
+    position:absolute;bottom:10px;right:12px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    font-weight:600;opacity:.35;pointer-events:none;
+  }
+  .shim-viewer .viewer-loading{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;opacity:.4;
+  }
   .config-left .price small{font-size:.35em;opacity:.55;letter-spacing:.04em;margin-left:8px;font-style:normal;font-family:'Inter';font-weight:600}
   .config-left .summary{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;font-size:14px;margin-top:10px}
   .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
@@ -229,8 +256,6 @@
 </head>
 <body>
 
-<div class="placeholder-banner">Preview build — pricing &amp; catalog are placeholders. Real catalog lands 2026-04-24.</div>
-
 <div class="announce">
   <div class="container">
     <span>Don't see your spec?</span>
@@ -285,6 +310,10 @@
 
     <div class="config reveal">
       <div class="config-left">
+        <div class="shim-viewer" id="shimViewer" aria-label="3D preview of your shim">
+          <div class="viewer-loading" id="viewerLoading">Loading preview…</div>
+          <div class="viewer-hint">Drag to rotate</div>
+        </div>
         <div class="label">Your shim</div>
         <div class="price" id="priceDisplay">$<span id="priceNum">0.00</span><small id="priceEach">/pack</small></div>
         <div class="summary">
@@ -695,6 +724,248 @@
     }
     alert('Preview build — cart/checkout not wired yet. Shopify integration lands once the real catalog drops.');
   });
+</script>
+
+<script type="module">
+  // 3D shim preview (v1) — lazy-loaded when the configurator is scrolled near.
+  // Reads current ID / OD / thickness / shape / notch count from the same DOM the configurator uses
+  // and rebuilds the mesh. Neutral metal look (no material callout).
+
+  const viewerEl = document.getElementById('shimViewer');
+  const loadingEl = document.getElementById('viewerLoading');
+
+  let started = false;
+  const io = new IntersectionObserver((entries)=>{
+    if(entries[0].isIntersecting && !started){
+      started = true;
+      io.disconnect();
+      start().catch(err => {
+        console.error('Shim viewer failed to start:', err);
+        if(loadingEl) loadingEl.textContent = 'Preview unavailable';
+      });
+    }
+  }, { rootMargin: '200px' });
+  io.observe(viewerEl);
+
+  async function start(){
+    const THREE = await import('three');
+    const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
+
+    // --- Scene / renderer / camera ---
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    viewerEl.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    // Environment map for nice metallic reflections (neutral studio-ish)
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    camera.position.set(0, 1.1, 2.6);
+    camera.lookAt(0, 0, 0);
+
+    // Subtle rim + key lights on top of the env map
+    const key = new THREE.DirectionalLight(0xffffff, 0.9);
+    key.position.set(2, 3, 2);
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.35);
+    rim.position.set(-2, -1, -2);
+    scene.add(rim);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.9;
+    controls.minPolarAngle = Math.PI * 0.15;
+    controls.maxPolarAngle = Math.PI * 0.85;
+
+    // Material — generic metal (no branded material, no callout anywhere)
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xc8c9cb,
+      metalness: 0.92,
+      roughness: 0.32,
+      envMapIntensity: 1.0,
+    });
+
+    // Mesh placeholder (rebuilt on every spec change)
+    let mesh = null;
+    const group = new THREE.Group();
+    // Lay the shim "face up" (extrude is along Z; rotate so Z → Y means face points up)
+    group.rotation.x = -Math.PI / 2;
+    scene.add(group);
+
+    // --- Geometry builder ---
+    // Returns a THREE.Shape representing the 2D outer contour (with optional notches on the outer edge)
+    // and pushes a circular hole for the inner diameter.
+    function makeShimShape(outerR, innerR, notchCount){
+      const shape = new THREE.Shape();
+      const SEGMENTS = 256;
+
+      // Notch geometry params (relative to outer radius so it scales with size)
+      const notchDepth = outerR * 0.06;
+      const notchAngularWidth = 0.09; // radians (~5.1°) for a full notch
+
+      // Evenly-spaced notches. 0.5 = one half-width notch.
+      const notches = [];
+      if(notchCount === 0.5){
+        notches.push({ angle: 0, width: notchAngularWidth * 0.5 });
+      } else if(notchCount > 0){
+        for(let i = 0; i < notchCount; i++){
+          notches.push({ angle: (i / notchCount) * Math.PI * 2, width: notchAngularWidth });
+        }
+      }
+
+      // Sweep outer contour
+      for(let s = 0; s <= SEGMENTS; s++){
+        const a = (s / SEGMENTS) * Math.PI * 2;
+        let r = outerR;
+        for(const n of notches){
+          // shortest signed distance between a and n.angle, wrapped into [-PI, PI]
+          let d = a - n.angle;
+          d = Math.atan2(Math.sin(d), Math.cos(d));
+          if(Math.abs(d) < n.width / 2){
+            // Smooth the notch bottom slightly so the cut doesn't render as a hard spike
+            const t = Math.abs(d) / (n.width / 2);  // 0 at notch center, 1 at notch edge
+            r = outerR - notchDepth * (1 - t * t);
+            break;
+          }
+        }
+        const x = Math.cos(a) * r;
+        const y = Math.sin(a) * r;
+        if(s === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+      }
+
+      // Inner hole — always a clean circle
+      const hole = new THREE.Path();
+      hole.absellipse(0, 0, innerR, innerR, 0, Math.PI * 2, true);
+      shape.holes.push(hole);
+
+      return shape;
+    }
+
+    function buildMesh(odMM, idMM, thicknessMM, notchCount){
+      // Normalize so the outer diameter renders at a consistent scene size (keeps camera framing stable)
+      const SCENE_OD = 1.6; // scene units
+      const scale = SCENE_OD / odMM;
+
+      const outerR = (odMM / 2) * scale;
+      const innerR = (idMM / 2) * scale;
+      const depth  = thicknessMM * scale;
+
+      const shape = makeShimShape(outerR, innerR, notchCount);
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth: depth,
+        bevelEnabled: true,
+        bevelThickness: Math.min(depth * 0.25, outerR * 0.008),
+        bevelSize: Math.min(depth * 0.25, outerR * 0.008),
+        bevelSegments: 2,
+        curveSegments: 128,
+        steps: 1,
+      });
+      // Center on Z so rotation pivots through the middle of the shim
+      geometry.translate(0, 0, -depth / 2);
+      geometry.computeVertexNormals();
+      return new THREE.Mesh(geometry, material);
+    }
+
+    function replaceMesh(odMM, idMM, thicknessMM, notchCount){
+      if(mesh){
+        group.remove(mesh);
+        mesh.geometry.dispose();
+        mesh = null;
+      }
+      mesh = buildMesh(odMM, idMM, thicknessMM, notchCount);
+      group.add(mesh);
+    }
+
+    // --- Read current spec from the configurator DOM ---
+    function currentSpec(){
+      const id = parseFloat(document.getElementById('idSel').value);
+      const od = parseFloat(document.getElementById('odSel').value);
+      const th = parseFloat(document.getElementById('thSel').value);
+      const shapeBtn = document.querySelector('[data-shape][aria-pressed="true"]');
+      const isBleed = shapeBtn && shapeBtn.dataset.shape === 'bleed';
+      const notchVal = parseFloat(document.getElementById('notchSel').value);
+      return {
+        od: od || null,
+        id: id || null,
+        th: th || null,
+        isBleed,
+        notchCount: isBleed && !isNaN(notchVal) ? notchVal : 0,
+      };
+    }
+
+    // Default placeholder shim (renders before the user picks anything so the viewer isn't empty)
+    const DEFAULT = { od: 22, id: 8, th: 0.5, isBleed:false, notchCount:0 };
+
+    function update(){
+      const s = currentSpec();
+      // Fall back to default values for anything not yet picked — keeps the preview live
+      const od = s.od || DEFAULT.od;
+      const id = s.id || DEFAULT.id;
+      // Real thickness is 0.1–0.8mm on an OD of 11–35mm — visually honest but readable.
+      // Clamp the *rendered* thickness to a visible minimum so the shim doesn't vanish below ~0.1mm.
+      const realTh = s.th || DEFAULT.th;
+      const renderTh = Math.max(realTh, od * 0.012);  // minimum ~1.2% of OD
+      const notchCount = s.isBleed ? s.notchCount : 0;
+
+      replaceMesh(od, id, renderTh, notchCount);
+    }
+
+    // --- Resize ---
+    function resize(){
+      const w = viewerEl.clientWidth;
+      const h = viewerEl.clientHeight;
+      if(!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(resize).observe(viewerEl);
+    resize();
+
+    // --- Hook into configurator events ---
+    ['idSel','odSel','thSel','notchSel'].forEach(id => {
+      document.getElementById(id).addEventListener('change', update);
+    });
+    document.querySelectorAll('[data-shape]').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(update, 0));
+    });
+
+    // Initial render
+    update();
+    if(loadingEl) loadingEl.remove();
+
+    // --- Animate ---
+    let rafId;
+    function tick(){
+      controls.update();
+      renderer.render(scene, camera);
+      rafId = requestAnimationFrame(tick);
+    }
+    tick();
+
+    // Pause rendering when off-screen to save battery
+    const pauseIO = new IntersectionObserver((entries)=>{
+      if(entries[0].isIntersecting){
+        if(!rafId) tick();
+      } else {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    });
+    pauseIO.observe(viewerEl);
+  }
 </script>
 
 </body>
