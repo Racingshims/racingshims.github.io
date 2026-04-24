@@ -516,16 +516,12 @@
     odSel: {
       placeholder: 'Choose OD',
       rows: [
-        {mm:20, inDisp:'0.787"', mmDisp:'20 mm'},
-        {mm:24, inDisp:'0.945"', mmDisp:'24 mm'},
-        {mm:28, inDisp:'1.102"', mmDisp:'28 mm'},
-        {mm:32, inDisp:'1.260"', mmDisp:'32 mm'},
-        {mm:36, inDisp:'1.417"', mmDisp:'36 mm'},
-        {mm:40, inDisp:'1.575"', mmDisp:'40 mm'},
-        {mm:44, inDisp:'1.732"', mmDisp:'44 mm'},
-        {mm:48, inDisp:'1.890"', mmDisp:'48 mm'},
-        {mm:50, inDisp:'1.969"', mmDisp:'50 mm'},
-        {mm:55, inDisp:'2.165"', mmDisp:'55 mm'},
+        {mm:15.748, inDisp:'0.620"', mmDisp:null},
+        {mm:19.050, inDisp:'0.750"', mmDisp:null},
+        {mm:22.860, inDisp:'0.900"', mmDisp:null},
+        {mm:26.670, inDisp:'1.050"', mmDisp:null},
+        {mm:30.480, inDisp:'1.200"', mmDisp:null},
+        {mm:34.290, inDisp:'1.350"', mmDisp:null},
       ]
     },
     thSel: {
@@ -543,9 +539,16 @@
     const sel = document.getElementById(id);
     const prev = sel.value;
     const cfg = DIMS[id];
+    const rows = cfg.rows.filter(r => unit==='imperial' ? r.inDisp : r.mmDisp);
+    if(rows.length === 0){
+      sel.innerHTML = '<option value="">Imperial only — metric coming soon</option>';
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
     sel.innerHTML = '<option value="">'+cfg.placeholder+'</option>' +
-      cfg.rows.map(r=>'<option value="'+r.mm+'">'+(unit==='imperial'?r.inDisp:r.mmDisp)+'</option>').join('');
-    if(prev) sel.value = prev;
+      rows.map(r=>'<option value="'+r.mm+'">'+(unit==='imperial'?r.inDisp:r.mmDisp)+'</option>').join('');
+    if(prev && rows.some(r => String(r.mm) === prev)) sel.value = prev;
   }
   function refreshUnits(){
     ['idSel','odSel','thSel'].forEach(populateSelect);
