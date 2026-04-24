@@ -359,7 +359,7 @@
             <input id="qtyInput" type="number" min="1" max="500" value="1" inputmode="numeric" />
             <button type="button" aria-label="Increase" onclick="changeQty(1)">+</button>
           </div>
-          <div class="bulk-hint" id="bulkHint">Bulk discount applies at 25+ shims (placeholder threshold).</div>
+          <div class="bulk-hint" id="bulkHint">Orders $100+ ship free.</div>
         </div>
 
         <button class="add-btn" id="addBtn" type="button">
@@ -419,7 +419,8 @@
       <details class="reveal"><summary>Valve shim vs. bleed shim?</summary><p><strong>Valve shims</strong> are solid round discs — they control the main flow. <strong>Bleed shims</strong> have a small slot or notch cut into the edge, letting a little oil through even when the stack is seated. Both live in almost every stack.</p></details>
       <details class="reveal"><summary>How do I know what I need?</summary><p>If you're already tuning your own shocks you'll know your ID/OD/thickness by number. If you're new, grab a dial caliper and measure your existing stack, or call your shock builder. A shim guide is coming to this site soon.</p></details>
       <details class="reveal"><summary>Do you ship same day?</summary><p>Yes — if your order lands before the daily cutoff, it ships same day. Otherwise it goes out next business morning.</p></details>
-      <details class="reveal"><summary>Bulk orders?</summary><p>Bulk discount kicks in at a threshold quantity per SKU (exact threshold and discount coming with the catalog launch). Shock builders and race teams — reach out for open-account terms.</p></details>
+      <details class="reveal"><summary>How much is shipping?</summary><p>Flat-rate shipping on orders under $100. Anything $100 or more ships <strong>free</strong>, automatically — no code needed.</p></details>
+      <details class="reveal"><summary>Bulk orders?</summary><p>Shock builders and race teams — reach out for open-account terms and team pricing.</p></details>
       <details class="reveal"><summary>Returns?</summary><p>Unopened shims in original packaging can come back within 30 days. We can't take back opened/used stacks for obvious reasons.</p></details>
     </div>
   </div>
@@ -499,7 +500,7 @@
   // PLACEHOLDER pricing — will be replaced by real catalog
   // unit price = base + OD-tier adjustment + thickness adjustment
   // valve vs bleed: bleed +$0.10 each
-  // bulk discount: 25+ shims => 10% off
+  // shipping: free on orders $100+
   function unitPrice(){
     const od = parseFloat(document.getElementById('odSel').value) || 0;
     const th = parseFloat(document.getElementById('thSel').value) || 0;
@@ -516,9 +517,8 @@
   function computePrice(){
     const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
     const unit = unitPrice();
-    let total = unit * qty;
-    let discounted = false;
-    if(qty >= 25 && unit > 0){ total *= 0.9; discounted = true; }
+    const total = unit * qty;
+    const freeShip = total >= 100;
 
     document.getElementById('sumQty').textContent = qty;
     document.getElementById('sumID').textContent  = document.getElementById('idSel').value ? document.getElementById('idSel').value + ' mm' : '—';
@@ -526,12 +526,13 @@
     document.getElementById('sumTh').textContent  = document.getElementById('thSel').value ? parseFloat(document.getElementById('thSel').value).toFixed(2) + ' mm' : '—';
     document.getElementById('sumUnit').textContent = unit ? '$' + unit.toFixed(2) : '—';
     document.getElementById('priceNum').textContent = total.toFixed(2);
-    document.getElementById('priceEach').textContent = qty === 1 ? '/shim' : '/pack of ' + qty + (discounted ? ' · 10% off' : '');
+    document.getElementById('priceEach').textContent = qty === 1 ? '/shim' : '/pack of ' + qty + (freeShip ? ' · free shipping' : '');
 
-    // bulk hint
+    // shipping hint
     const hint = document.getElementById('bulkHint');
-    if(qty >= 25) hint.textContent = '✓ Bulk discount applied: 10% off (placeholder).';
-    else hint.textContent = (25 - qty) + ' more for 10% bulk discount (placeholder threshold).';
+    if(!unit) hint.textContent = 'Orders $100+ ship free.';
+    else if(freeShip) hint.textContent = '✓ Free shipping unlocked ($100+).';
+    else hint.textContent = '$' + (100 - total).toFixed(2) + ' more for free shipping.';
   }
   computePrice();
 
