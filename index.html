@@ -102,7 +102,7 @@
     display:grid;grid-template-columns:1.05fr 1fr;background:var(--paper);
   }
   @media (max-width:900px){ .config{grid-template-columns:1fr} }
-  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:20px}
+  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:20px;order:2}
   .config-left .label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.7}
   .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(72px,10vw,120px);line-height:.9}
   .config-left .price small{font-size:.35em;opacity:.55;letter-spacing:.04em;margin-left:8px;font-style:normal;font-family:'Inter';font-weight:600}
@@ -110,7 +110,7 @@
   .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
   .config-left .summary strong{font-weight:600}
   .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
-  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px}
+  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px;order:1}
 
   .field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--steel);margin-bottom:10px}
 
