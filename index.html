@@ -292,6 +292,7 @@
           <div><span>Inner Ø</span><strong id="sumID">—</strong></div>
           <div><span>Outer Ø</span><strong id="sumOD">—</strong></div>
           <div><span>Thickness</span><strong id="sumTh">—</strong></div>
+          <div id="sumNotchRow" style="display:none"><span>Notches</span><strong id="sumNotch">—</strong></div>
           <div><span>Quantity</span><strong id="sumQty">1</strong></div>
           <div><span>Per shim</span><strong id="sumUnit">—</strong></div>
         </div>
@@ -352,8 +353,15 @@
           </div>
         </div>
 
+        <div class="field" id="notchField" style="display:none">
+          <label>6. Notches</label>
+          <div class="select-wrap">
+            <select id="notchSel"></select>
+          </div>
+        </div>
+
         <div class="field">
-          <label>6. Quantity</label>
+          <label id="qtyLabel">6. Quantity</label>
           <div class="qty">
             <button type="button" aria-label="Decrease" onclick="changeQty(-1)">−</button>
             <input id="qtyInput" type="number" min="1" max="500" value="1" inputmode="numeric" />
@@ -493,15 +501,33 @@
 
   // Shape toggle
   let shape = 'valve';
+  const NOTCH_OPTIONS = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
+  function fmtNotch(n){ return n === 0.5 ? '0.5' : String(n); }
+  function populateNotches(){
+    const sel = document.getElementById('notchSel');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">Choose notch count</option>' +
+      NOTCH_OPTIONS.map(n=>'<option value="'+n+'">'+fmtNotch(n)+'</option>').join('');
+    if(prev) sel.value = prev;
+  }
+  populateNotches();
+  function applyShape(){
+    const isBleed = shape === 'bleed';
+    document.getElementById('notchField').style.display = isBleed ? '' : 'none';
+    document.getElementById('sumNotchRow').style.display = isBleed ? '' : 'none';
+    document.getElementById('qtyLabel').textContent = isBleed ? '7. Quantity' : '6. Quantity';
+    document.getElementById('sumShape').textContent = isBleed ? 'Bleed' : 'Valve';
+  }
   document.querySelectorAll('[data-shape]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('[data-shape]').forEach(b=>b.setAttribute('aria-pressed','false'));
       btn.setAttribute('aria-pressed','true');
       shape = btn.dataset.shape;
-      document.getElementById('sumShape').textContent = shape === 'valve' ? 'Valve' : 'Bleed';
+      applyShape();
       computePrice();
     });
   });
+  document.getElementById('notchSel').addEventListener('change', computePrice);
 
   // Unit toggle — canonical value is always mm; display text switches to inches when imperial.
   // Metric is intentionally "coming soon" across the board for now (null mmDisp = filtered out in metric mode).
@@ -652,6 +678,7 @@
     document.getElementById('sumID').textContent  = selDisplay('idSel');
     document.getElementById('sumOD').textContent  = selDisplay('odSel');
     document.getElementById('sumTh').textContent  = selDisplay('thSel');
+    document.getElementById('sumNotch').textContent = selDisplay('notchSel');
     document.getElementById('sumUnit').textContent = perShim ? '$' + perShim.toFixed(2) : '—';
     document.getElementById('priceNum').textContent = total.toFixed(2);
     document.getElementById('priceEach').textContent = qty === 1 ? '/shim' : '/pack of ' + qty + (freeShip ? ' · free shipping' : '');
@@ -668,6 +695,9 @@
   document.getElementById('addBtn').addEventListener('click', ()=>{
     const perShim = unitPrice();
     if(!perShim){ alert('Pick an inner diameter, outer diameter, and thickness first.'); return; }
+    if(shape === 'bleed' && !document.getElementById('notchSel').value){
+      alert('Pick a notch count for the bleed shim.'); return;
+    }
     alert('Preview build — cart/checkout not wired yet. Shopify integration lands once the real catalog drops.');
   });
 </script>
