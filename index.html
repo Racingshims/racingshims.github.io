@@ -515,14 +515,24 @@
     },
     odSel: {
       placeholder: 'Choose OD',
-      rows: [
-        {mm:15.748, inDisp:'0.620"', mmDisp:null},
-        {mm:19.050, inDisp:'0.750"', mmDisp:null},
-        {mm:22.860, inDisp:'0.900"', mmDisp:null},
-        {mm:26.670, inDisp:'1.050"', mmDisp:null},
-        {mm:30.480, inDisp:'1.200"', mmDisp:null},
-        {mm:34.290, inDisp:'1.350"', mmDisp:null},
-      ]
+      // ODs depend on which ID is selected — these map by the ID's canonical mm value
+      rowsByID: {
+        '8': [
+          {mm:10.998, inDisp:'0.433"', mmDisp:null},
+          {mm:13.005, inDisp:'0.512"', mmDisp:null},
+          {mm:16.002, inDisp:'0.630"', mmDisp:null},
+          {mm:18.999, inDisp:'0.748"', mmDisp:null},
+          {mm:22.098, inDisp:'0.870"', mmDisp:null},
+        ],
+        '12.7': [
+          {mm:15.748, inDisp:'0.620"', mmDisp:null},
+          {mm:19.050, inDisp:'0.750"', mmDisp:null},
+          {mm:22.860, inDisp:'0.900"', mmDisp:null},
+          {mm:26.670, inDisp:'1.050"', mmDisp:null},
+          {mm:30.480, inDisp:'1.200"', mmDisp:null},
+          {mm:34.290, inDisp:'1.350"', mmDisp:null},
+        ]
+      }
     },
     thSel: {
       placeholder: 'Choose thickness',
@@ -539,7 +549,15 @@
     const sel = document.getElementById(id);
     const prev = sel.value;
     const cfg = DIMS[id];
-    const rows = cfg.rows.filter(r => unit==='imperial' ? r.inDisp : r.mmDisp);
+    let rows;
+    if(id === 'odSel'){
+      // OD depends on which ID is currently selected
+      const currentID = document.getElementById('idSel').value;
+      rows = (currentID && cfg.rowsByID[currentID]) ? cfg.rowsByID[currentID] : [];
+    } else {
+      rows = cfg.rows;
+    }
+    rows = rows.filter(r => unit==='imperial' ? r.inDisp : r.mmDisp);
     if(rows.length === 0){
       sel.innerHTML = '<option value="">'+cfg.placeholder+'</option>';
       sel.disabled = true;
@@ -574,7 +592,12 @@
     computePrice();
   }
   qtyInput.addEventListener('input', computePrice);
-  ['idSel','odSel','thSel'].forEach(id=>document.getElementById(id).addEventListener('change', computePrice));
+  ['odSel','thSel'].forEach(id=>document.getElementById(id).addEventListener('change', computePrice));
+  // ID drives which ODs are available — repopulate OD on ID change
+  document.getElementById('idSel').addEventListener('change', ()=>{
+    populateSelect('odSel');
+    computePrice();
+  });
 
   // PLACEHOLDER pricing — will be replaced by real catalog
   // unit price = base + OD-tier adjustment + thickness adjustment
