@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Racing Shims — Spec your shim. Ship today.</title>
+<meta name="description" content="Shock valving shims for dirt car racers. Pick your inner diameter, outer diameter, thickness and shape — we ship it. Valve and bleed shims, in stock." />
+<meta name="theme-color" content="#000000" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#000000;
+    --paper:#ffffff;
+    --graphite:#111113;
+    --fog:#f4f4f5;
+    --line:#e5e5e5;
+    --steel:#6b7280;
+    --focus:#000000;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  h1,h2,h3,.display{
+    font-family:'Barlow Condensed',system-ui,sans-serif;
+    font-style:italic;
+    font-weight:900;
+    letter-spacing:-.01em;
+    line-height:.95;
+    margin:0;
+    text-transform:uppercase;
+  }
+  .container{max-width:1200px;margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit}
+
+  /* NAV */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:22px;letter-spacing:.02em;text-transform:uppercase}
+  .brand img{height:30px;width:auto;display:block}
+  .nav-links{display:flex;gap:28px;font-weight:500;font-size:15px}
+  .nav-links a{color:var(--ink);opacity:.7;transition:opacity .15s}
+  .nav-links a:hover{opacity:1}
+  .nav-cta{
+    background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;
+    font-weight:600;font-size:14px;letter-spacing:.02em;
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:0;
+    transition:transform .15s, background .15s;
+  }
+  .nav-cta:hover{transform:translateY(-1px)}
+  @media (max-width:760px){ .nav-links{display:none} }
+
+  /* HERO */
+  .hero{padding:72px 0 48px;border-bottom:1px solid var(--line)}
+  .hero h1{font-size:clamp(56px,12vw,148px)}
+  .hero .sub{
+    margin-top:18px;max-width:620px;font-size:18px;color:#3a3a3a;
+  }
+  .hero .cta-row{margin-top:28px;display:flex;flex-wrap:wrap;gap:12px}
+  .btn-primary{
+    background:var(--ink);color:var(--paper);border:0;
+    padding:16px 24px;border-radius:999px;font-weight:600;font-size:16px;
+    display:inline-flex;align-items:center;gap:10px;cursor:pointer;
+    transition:transform .15s;
+  }
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-ghost{
+    background:transparent;color:var(--ink);border:1.5px solid var(--ink);
+    padding:14px 22px;border-radius:999px;font-weight:600;font-size:16px;
+    display:inline-flex;align-items:center;gap:10px;cursor:pointer;
+  }
+  .trust-row{display:flex;flex-wrap:wrap;gap:28px;margin-top:36px;font-size:13px;color:var(--steel);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  .trust-row span{display:inline-flex;align-items:center;gap:8px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ink);display:inline-block}
+
+  /* SECTION HEADER */
+  .sec{padding:88px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:40px;flex-wrap:wrap}
+  .sec-head h2{font-size:clamp(40px,6vw,72px)}
+  .kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--steel)}
+
+  /* CONFIGURATOR */
+  .config{
+    border:2px solid var(--ink);border-radius:24px;overflow:hidden;
+    display:grid;grid-template-columns:1.05fr 1fr;background:var(--paper);
+  }
+  @media (max-width:900px){ .config{grid-template-columns:1fr} }
+  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:20px}
+  .config-left .label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.7}
+  .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(72px,10vw,120px);line-height:.9}
+  .config-left .price small{font-size:.35em;opacity:.55;letter-spacing:.04em;margin-left:8px;font-style:normal;font-family:'Inter';font-weight:600}
+  .config-left .summary{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;font-size:14px;margin-top:10px}
+  .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .config-left .summary strong{font-weight:600}
+  .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px}
+
+  .field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--steel);margin-bottom:10px}
+
+  .shape-toggle{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .shape-opt{
+    border:1.5px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;
+    display:flex;align-items:center;gap:14px;background:var(--paper);
+    transition:border-color .15s, background .15s;
+  }
+  .shape-opt:hover{border-color:var(--ink)}
+  .shape-opt[aria-pressed="true"]{border-color:var(--ink);background:var(--fog)}
+  .shape-opt svg{flex:0 0 36px}
+  .shape-opt .n{font-weight:700;font-size:15px}
+  .shape-opt .d{font-size:12px;color:var(--steel)}
+
+  select, input[type="number"]{
+    width:100%;font-family:inherit;font-size:16px;font-weight:500;
+    padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+    background:var(--paper);color:var(--ink);
+    appearance:none;-webkit-appearance:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  select:focus, input:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 3px rgba(0,0,0,.08)}
+  .select-wrap{position:relative}
+  .select-wrap::after{
+    content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;
+    border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    transform:translateY(-70%) rotate(45deg);pointer-events:none;
+  }
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:520px){ .two-col{grid-template-columns:1fr} }
+
+  .qty{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;width:fit-content}
+  .qty button{background:var(--paper);border:0;width:52px;font-size:22px;font-weight:700;cursor:pointer}
+  .qty button:hover{background:var(--fog)}
+  .qty input{border:0;border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);border-radius:0;width:80px;text-align:center;font-size:16px;font-weight:600;padding:12px 8px}
+  .qty input:focus{box-shadow:none}
+  .bulk-hint{font-size:12px;color:var(--steel);margin-top:8px}
+
+  .add-btn{
+    margin-top:8px;width:100%;
+    background:var(--ink);color:var(--paper);border:0;border-radius:14px;
+    padding:18px;font-size:16px;font-weight:700;letter-spacing:.02em;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:transform .15s;
+  }
+  .add-btn:hover{transform:translateY(-1px)}
+
+  /* HOW IT WORKS */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  @media (max-width:860px){ .steps{grid-template-columns:1fr} }
+  .step{border:1.5px solid var(--line);border-radius:20px;padding:28px;background:var(--paper);transition:border-color .2s, transform .2s}
+  .step:hover{border-color:var(--ink);transform:translateY(-2px)}
+  .step .num{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:56px;line-height:1;color:var(--ink)}
+  .step h3{font-size:28px;margin:14px 0 8px}
+  .step p{color:#3a3a3a;font-size:15px;margin:0}
+
+  /* ABOUT */
+  .about{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center}
+  @media (max-width:900px){ .about{grid-template-columns:1fr} }
+  .about h2{font-size:clamp(40px,6vw,72px)}
+  .about p{font-size:17px;color:#222;max-width:560px}
+  .about .stat{display:flex;gap:32px;margin-top:32px;flex-wrap:wrap}
+  .about .stat div{}
+  .about .stat .n{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:56px;line-height:1}
+  .about .stat .l{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--steel);margin-top:6px}
+  .about-img{
+    aspect-ratio:1/1;border-radius:20px;background:var(--ink);
+    display:flex;align-items:center;justify-content:center;color:var(--paper);
+    font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(80px,14vw,180px);
+    overflow:hidden;position:relative;
+  }
+  .about-img img{max-width:70%;height:auto;filter:invert(1)}
+
+  /* FAQ */
+  .faq{max-width:840px;margin:0 auto}
+  details{border-top:1px solid var(--line);padding:20px 0}
+  details:last-child{border-bottom:1px solid var(--line)}
+  details summary{
+    list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;
+    font-family:'Barlow Condensed';font-style:italic;font-weight:800;font-size:clamp(22px,3vw,30px);text-transform:uppercase;letter-spacing:.01em;
+  }
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";font-family:'Inter';font-weight:400;font-size:32px;line-height:1;transition:transform .2s}
+  details[open] summary::after{content:"–"}
+  details p{margin:14px 0 0;color:#333;font-size:16px;max-width:720px}
+
+  /* FOOTER */
+  footer{background:var(--ink);color:var(--paper);padding:64px 0 32px}
+  footer .container{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:32px}
+  @media (max-width:760px){ footer .container{grid-template-columns:1fr 1fr} }
+  footer .brand{color:var(--paper)}
+  footer .brand img{filter:invert(1)}
+  footer h4{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.6;margin:0 0 16px}
+  footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;font-size:14px;opacity:.85}
+  footer ul a:hover{opacity:1;text-decoration:underline}
+  .foot-bottom{border-top:1px solid rgba(255,255,255,.12);margin-top:48px;padding-top:24px;font-size:12px;opacity:.55;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  /* REVEAL */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease, transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* placeholder badge */
+  .placeholder-banner{
+    background:var(--fog);border-bottom:1px solid var(--line);
+    font-size:12px;color:var(--steel);text-align:center;padding:8px 16px;
+    letter-spacing:.06em;text-transform:uppercase;font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<div class="placeholder-banner">Preview build — pricing &amp; catalog are placeholders. Real catalog lands 2026-04-24.</div>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="#top" class="brand">
+      <img src="logo.jpg" alt="Racing Shims" />
+      <span>Racing Shims</span>
+    </a>
+    <div class="nav-links">
+      <a href="#shop">Shop</a>
+      <a href="#how">How it works</a>
+      <a href="#about">About</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <button class="nav-cta" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">
+      Spec a shim
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</nav>
+
+<section id="top" class="hero">
+  <div class="container">
+    <div class="kicker reveal">Valving shims for dirt car racers</div>
+    <h1 class="reveal" style="margin-top:14px">Spec your shim.<br/>Ship today.</h1>
+    <p class="sub reveal">Pick your inner diameter, outer diameter, thickness and shape. We pull it from our shop and get it on the truck the same day. In-house stock. Built by racers, for racers.</p>
+    <div class="cta-row reveal">
+      <button class="btn-primary" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">
+        Build your shim
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+      <a class="btn-ghost" href="#faq">New to shim stacks?</a>
+    </div>
+    <div class="trust-row reveal">
+      <span><span class="dot"></span> In-house inventory</span>
+      <span><span class="dot"></span> Same-day shipping</span>
+      <span><span class="dot"></span> Family-owned shop</span>
+    </div>
+  </div>
+</section>
+
+<section id="shop" class="sec">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">Shim configurator</div>
+        <h2 style="margin-top:10px">Build it.</h2>
+      </div>
+      <p style="max-width:420px;color:#333;margin:0">Four choices, one price, one button. Takes under a minute on a phone.</p>
+    </div>
+
+    <div class="config reveal">
+      <div class="config-left">
+        <div class="label">Your shim</div>
+        <div class="price" id="priceDisplay">$<span id="priceNum">0.00</span><small id="priceEach">/pack</small></div>
+        <div class="summary">
+          <div><span>Shape</span><strong id="sumShape">Valve</strong></div>
+          <div><span>Inner Ø</span><strong id="sumID">—</strong></div>
+          <div><span>Outer Ø</span><strong id="sumOD">—</strong></div>
+          <div><span>Thickness</span><strong id="sumTh">—</strong></div>
+          <div><span>Quantity</span><strong id="sumQty">1</strong></div>
+          <div><span>Per shim</span><strong id="sumUnit">—</strong></div>
+        </div>
+        <div class="note">Placeholder pricing — real prices wire in once Kobe drops the catalog spreadsheet.</div>
+      </div>
+
+      <div class="config-right">
+        <div class="field">
+          <label>1. Shape</label>
+          <div class="shape-toggle" role="radiogroup" aria-label="Shim shape">
+            <button type="button" class="shape-opt" data-shape="valve" aria-pressed="true">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="18" r="14"/><circle cx="18" cy="18" r="4" fill="currentColor"/>
+              </svg>
+              <div><div class="n">Valve shim</div><div class="d">Solid round</div></div>
+            </button>
+            <button type="button" class="shape-opt" data-shape="bleed" aria-pressed="false">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="18" r="14"/><circle cx="18" cy="18" r="4" fill="currentColor"/>
+                <path d="M18 4 L18 10" stroke-width="3"/>
+              </svg>
+              <div><div class="n">Bleed shim</div><div class="d">With bleed slot</div></div>
+            </button>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>2. Inner diameter</label>
+            <div class="select-wrap">
+              <select id="idSel">
+                <option value="">Choose ID</option>
+                <option value="8">8 mm</option>
+                <option value="10">10 mm</option>
+                <option value="12">12 mm</option>
+                <option value="14">14 mm</option>
+                <option value="16">16 mm</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>3. Outer diameter</label>
+            <div class="select-wrap">
+              <select id="odSel">
+                <option value="">Choose OD</option>
+                <option value="20">20 mm</option>
+                <option value="24">24 mm</option>
+                <option value="28">28 mm</option>
+                <option value="32">32 mm</option>
+                <option value="36">36 mm</option>
+                <option value="40">40 mm</option>
+                <option value="44">44 mm</option>
+                <option value="48">48 mm</option>
+                <option value="50">50 mm</option>
+                <option value="55">55 mm</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>4. Thickness</label>
+          <div class="select-wrap">
+            <select id="thSel">
+              <option value="">Choose thickness</option>
+              <option value="0.10">0.10 mm</option>
+              <option value="0.15">0.15 mm</option>
+              <option value="0.20">0.20 mm</option>
+              <option value="0.25">0.25 mm</option>
+              <option value="0.30">0.30 mm</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>5. Quantity</label>
+          <div class="qty">
+            <button type="button" aria-label="Decrease" onclick="changeQty(-1)">−</button>
+            <input id="qtyInput" type="number" min="1" max="500" value="1" inputmode="numeric" />
+            <button type="button" aria-label="Increase" onclick="changeQty(1)">+</button>
+          </div>
+          <div class="bulk-hint" id="bulkHint">Bulk discount applies at 25+ shims (placeholder threshold).</div>
+        </div>
+
+        <button class="add-btn" id="addBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2l1 4h13l-2 10H8L5 4H2"/><circle cx="9" cy="20" r="1.5" fill="currentColor"/><circle cx="18" cy="20" r="1.5" fill="currentColor"/></svg>
+          Add to cart
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="sec">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">How it works</div>
+        <h2 style="margin-top:10px">Three steps. That's it.</h2>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="num">01</div><h3>Spec it</h3><p>Pick shape, ID, OD, thickness and quantity. Live price as you go. No account needed.</p></div>
+      <div class="step reveal"><div class="num">02</div><h3>We pull it</h3><p>Your order drops straight to our shop next door to the factory. Real humans pull it off the shelf.</p></div>
+      <div class="step reveal"><div class="num">03</div><h3>Back to racing</h3><p>Ships the same day if ordered before cutoff. Track your order and get back to tuning.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="sec">
+  <div class="container">
+    <div class="about">
+      <div class="reveal">
+        <div class="kicker">Who we are</div>
+        <h2 style="margin-top:12px">Built next to a<br/>shock factory.</h2>
+        <p style="margin-top:18px">Racing Shims runs out of a building on the same property as Factory Kahne — a family-owned shock and suspension shop in Enumclaw, Washington. We saw racers mixing and matching shim stacks to dial in their cars, and realized nobody sold shims the way racers actually buy them: by exact spec, by the quantity you need, no minimums, no waiting.</p>
+        <p>So we did. Same inventory the factory pulls from. Same tolerances. Just sold how you want to buy them.</p>
+        <div class="stat">
+          <div><div class="n">Same-day</div><div class="l">Shipping cutoff</div></div>
+          <div><div class="n">In-house</div><div class="l">Inventory</div></div>
+          <div><div class="n">Racer-run</div><div class="l">End to end</div></div>
+        </div>
+      </div>
+      <div class="about-img reveal">
+        <img src="logo.jpg" alt="Racing Shims" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="sec">
+  <div class="container">
+    <div class="sec-head reveal" style="justify-content:center;text-align:center;flex-direction:column;align-items:center">
+      <div class="kicker">FAQ</div>
+      <h2 style="margin-top:10px">Shim questions, answered.</h2>
+    </div>
+    <div class="faq">
+      <details class="reveal"><summary>What is a shim?</summary><p>A shim is a thin metal disc that sits inside a shock absorber and controls how the oil flows through the valving — which is what actually determines how your shock damps. Stacking different diameters and thicknesses lets you tune compression and rebound to how your car feels on the dirt.</p></details>
+      <details class="reveal"><summary>Valve shim vs. bleed shim?</summary><p><strong>Valve shims</strong> are solid round discs — they control the main flow. <strong>Bleed shims</strong> have a small slot or notch cut into the edge, letting a little oil through even when the stack is seated. Both live in almost every stack.</p></details>
+      <details class="reveal"><summary>How do I know what I need?</summary><p>If you're already tuning your own shocks you'll know your ID/OD/thickness by number. If you're new, grab a dial caliper and measure your existing stack, or call your shock builder. A shim guide is coming to this site soon.</p></details>
+      <details class="reveal"><summary>Do you ship same day?</summary><p>Yes — if your order lands before the daily cutoff, it ships same day. Otherwise it goes out next business morning.</p></details>
+      <details class="reveal"><summary>Bulk orders?</summary><p>Bulk discount kicks in at a threshold quantity per SKU (exact threshold and discount coming with the catalog launch). Shock builders and race teams — reach out for open-account terms.</p></details>
+      <details class="reveal"><summary>Returns?</summary><p>Unopened shims in original packaging can come back within 30 days. We can't take back opened/used stacks for obvious reasons.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      <a href="#top" class="brand">
+        <img src="logo.jpg" alt="Racing Shims" />
+        <span>Racing Shims</span>
+      </a>
+      <p style="margin-top:16px;font-size:14px;opacity:.65;max-width:280px">Shock valving shims for dirt car racers. Enumclaw, WA.</p>
+    </div>
+    <div>
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#shop">Configurator</a></li>
+        <li><a href="#faq">Shim guide</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="mailto:hello@racingshims.com">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Facebook</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container foot-bottom">
+    <div>© <span id="yr"></span> Racing Shims. All rights reserved.</div>
+    <div>Preview build · placeholders in use</div>
+  </div>
+</footer>
+
+<script>
+  // Footer year
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // Scroll reveals
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // Shape toggle
+  let shape = 'valve';
+  document.querySelectorAll('.shape-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.shape-opt').forEach(b=>b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+      shape = btn.dataset.shape;
+      document.getElementById('sumShape').textContent = shape === 'valve' ? 'Valve' : 'Bleed';
+      computePrice();
+    });
+  });
+
+  // Quantity
+  const qtyInput = document.getElementById('qtyInput');
+  function changeQty(delta){
+    let v = parseInt(qtyInput.value,10) || 1;
+    v = Math.max(1, Math.min(500, v + delta));
+    qtyInput.value = v;
+    computePrice();
+  }
+  qtyInput.addEventListener('input', computePrice);
+  ['idSel','odSel','thSel'].forEach(id=>document.getElementById(id).addEventListener('change', computePrice));
+
+  // PLACEHOLDER pricing — will be replaced by real catalog
+  // unit price = base + OD-tier adjustment + thickness adjustment
+  // valve vs bleed: bleed +$0.10 each
+  // bulk discount: 25+ shims => 10% off
+  function unitPrice(){
+    const od = parseFloat(document.getElementById('odSel').value) || 0;
+    const th = parseFloat(document.getElementById('thSel').value) || 0;
+    const id = parseFloat(document.getElementById('idSel').value) || 0;
+    if(!od || !th || !id) return 0;
+    let base = 0.65;
+    if(od >= 44) base += 0.35;
+    else if(od >= 32) base += 0.20;
+    else if(od >= 24) base += 0.10;
+    if(th >= 0.25) base += 0.10;
+    if(shape === 'bleed') base += 0.10;
+    return base;
+  }
+  function computePrice(){
+    const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
+    const unit = unitPrice();
+    let total = unit * qty;
+    let discounted = false;
+    if(qty >= 25 && unit > 0){ total *= 0.9; discounted = true; }
+
+    document.getElementById('sumQty').textContent = qty;
+    document.getElementById('sumID').textContent  = document.getElementById('idSel').value ? document.getElementById('idSel').value + ' mm' : '—';
+    document.getElementById('sumOD').textContent  = document.getElementById('odSel').value ? document.getElementById('odSel').value + ' mm' : '—';
+    document.getElementById('sumTh').textContent  = document.getElementById('thSel').value ? parseFloat(document.getElementById('thSel').value).toFixed(2) + ' mm' : '—';
+    document.getElementById('sumUnit').textContent = unit ? '$' + unit.toFixed(2) : '—';
+    document.getElementById('priceNum').textContent = total.toFixed(2);
+    document.getElementById('priceEach').textContent = qty === 1 ? '/shim' : '/pack of ' + qty + (discounted ? ' · 10% off' : '');
+
+    // bulk hint
+    const hint = document.getElementById('bulkHint');
+    if(qty >= 25) hint.textContent = '✓ Bulk discount applied: 10% off (placeholder).';
+    else hint.textContent = (25 - qty) + ' more for 10% bulk discount (placeholder threshold).';
+  }
+  computePrice();
+
+  // Add to cart (stub)
+  document.getElementById('addBtn').addEventListener('click', ()=>{
+    const unit = unitPrice();
+    if(!unit){ alert('Pick an inner diameter, outer diameter, and thickness first.'); return; }
+    alert('Preview build — cart/checkout not wired yet. Shopify integration lands once the real catalog drops.');
+  });
+</script>
+
+</body>
+</html>
