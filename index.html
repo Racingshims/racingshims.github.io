@@ -296,7 +296,7 @@
           <div><span>Quantity</span><strong id="sumQty">1</strong></div>
           <div><span>Per shim</span><strong id="sumUnit">—</strong></div>
         </div>
-        <div class="note">Placeholder pricing — real prices wire in once Kobe drops the catalog spreadsheet.</div>
+        <div class="note">Free shipping on orders $100+. Flat $6.95 below.</div>
       </div>
 
       <div class="config-right">
@@ -647,22 +647,17 @@
     computePrice();
   });
 
-  // PLACEHOLDER pricing — will be replaced by real catalog
-  // unit price = base + OD-tier adjustment + thickness adjustment
-  // valve vs bleed: bleed +$0.10 each
-  // shipping: free on orders $100+
+  // Pricing (LOCKED 2026-04-23): flat per-shim rate by shape
+  //   Valve: $1.50 each
+  //   Bleed: $3.75 each
+  // Requires ID, OD, and thickness to all be picked before price shows.
+  // Shipping: free on orders $100+; flat $6.95 below.
   function unitPrice(){
     const od = parseFloat(document.getElementById('odSel').value) || 0;
     const th = parseFloat(document.getElementById('thSel').value) || 0;
     const id = parseFloat(document.getElementById('idSel').value) || 0;
     if(!od || !th || !id) return 0;
-    let base = 0.65;
-    if(od >= 44) base += 0.35;
-    else if(od >= 32) base += 0.20;
-    else if(od >= 24) base += 0.10;
-    if(th >= 0.25) base += 0.10;
-    if(shape === 'bleed') base += 0.10;
-    return base;
+    return shape === 'bleed' ? 3.75 : 1.50;
   }
   function computePrice(){
     const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
