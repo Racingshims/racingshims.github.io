@@ -117,7 +117,7 @@
     display:grid;grid-template-columns:1.05fr 1fr;background:var(--paper);
   }
   @media (max-width:900px){ .config{grid-template-columns:1fr} }
-  .config-left{padding:36px;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;gap:18px;order:2}
+  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:18px;order:2}
   .config-left .label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.7}
   .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(56px,8vw,96px);line-height:.9}
 
@@ -140,14 +140,10 @@
   }
   .config-left .price small{font-size:.35em;opacity:.55;letter-spacing:.04em;margin-left:8px;font-style:normal;font-family:'Inter';font-weight:600}
   .config-left .summary{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;font-size:14px;margin-top:10px}
-  .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.08)}
+  .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
   .config-left .summary strong{font-weight:600}
-  .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(0,0,0,.08)}
-  .config-right{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:22px;order:1}
-  .config-right .field label{color:rgba(255,255,255,.6)}
-  .config-right .bulk-hint{color:rgba(255,255,255,.55)}
-  .config-right .add-btn{background:var(--paper);color:var(--ink)}
-  .config-right select:focus, .config-right input:focus{box-shadow:0 0 0 3px rgba(255,255,255,.18)}
+  .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px;order:1}
 
   .field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--steel);margin-bottom:10px}
 
@@ -754,33 +750,56 @@
   async function start(){
     const THREE = await import('three');
     const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
-    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
 
     // --- Scene / renderer / camera ---
     const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.0;
     viewerEl.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    // Environment map for nice metallic reflections (neutral studio-ish)
+
+    // Custom 6-sided studio environment — bright "lights" at +Y/-Y/+X/-X/+Z/-Z
+    // ensure the metallic shim catches reflections from every direction the
+    // camera can orbit to. RoomEnvironment alone left the underside dark.
     const pmrem = new THREE.PMREMGenerator(renderer);
     pmrem.compileEquirectangularShader();
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    function buildEnvScene(){
+      const env = new THREE.Scene();
+      // Soft gray ambient sphere — base reflection color
+      const back = new THREE.Mesh(
+        new THREE.SphereGeometry(100, 32, 16),
+        new THREE.MeshBasicMaterial({
+          color: new THREE.Color(0.78, 0.78, 0.80),
+          side: THREE.BackSide,
+        })
+      );
+      env.add(back);
+      // HDR-bright (>1.0) studio "lights" at all 6 cardinal directions
+      const lightGeo = new THREE.SphereGeometry(20, 16, 8);
+      const lightMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(3.2, 3.2, 3.4),
+      });
+      const positions = [[0,50,0],[0,-50,0],[50,0,0],[-50,0,0],[0,0,50],[0,0,-50]];
+      for(const p of positions){
+        const m = new THREE.Mesh(lightGeo, lightMat);
+        m.position.set(p[0], p[1], p[2]);
+        env.add(m);
+      }
+      return env;
+    }
+    scene.environment = pmrem.fromScene(buildEnvScene(), 0.04).texture;
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
     camera.position.set(0, 1.1, 2.6);
     camera.lookAt(0, 0, 0);
 
-    // Subtle rim + key lights on top of the env map
-    const key = new THREE.DirectionalLight(0xffffff, 0.9);
-    key.position.set(2, 3, 2);
-    scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffffff, 0.35);
-    rim.position.set(-2, -1, -2);
-    scene.add(rim);
+    // Soft hemisphere fill — supplements the env so any matte component stays lit
+    // from both top and bottom (no single-direction shadowing).
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
+    scene.add(hemi);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -797,7 +816,7 @@
       color: 0xc8c9cb,
       metalness: 0.92,
       roughness: 0.32,
-      envMapIntensity: 1.0,
+      envMapIntensity: 1.2,
     });
 
     // Mesh placeholder (rebuilt on every spec change)
