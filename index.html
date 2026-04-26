@@ -829,34 +829,68 @@
     // --- Geometry builder ---
     // Returns a THREE.Shape representing the 2D outer contour (with optional notches on the outer edge)
     // and pushes a circular hole for the inner diameter.
-    function makeShimShape(outerR, innerR, notchCount){
-      const shape = new THREE.Shape();
-      const SEGMENTS = 384;
+    // Notch sizing rule (LOCKED 2026-04-26):
+    // - There are only 6 physical notch positions, evenly spaced around the shim.
+    // - Each base "notch unit" is 35 thou wide (0.889 mm of arc length).
+    // - notchCount = 0.5 → one half-width notch (17.5 thou) at position 0.
+    // - notchCount 1..6 → that many positions, each 1× base width.
+    // - notchCount > 6 → still only 6 positions, but the widths grow in base-width
+    //   units (q = floor(N/6), r = N mod 6 → r positions get (q+1)×base, the rest q×base).
+    //   So 12 = all 6 are 70 thou; 18 = all 6 are 105 thou; 32 = 2×210 thou + 4×175 thou; etc.
+    function computeNotches(notchCount, odMM){
+      if(!notchCount || notchCount <= 0) return [];
+      const BASE_MM = 35 * 0.0254; // 35 thou = 0.889 mm of arc
+      const baseAngular = BASE_MM / (odMM / 2); // arc / radius = angular width in radians
 
-      // Notch geometry params (relative to outer radius so it scales with size)
-      const notchDepth = outerR * 0.06;
-      const notchAngularWidth = 0.09; // radians (~5.1°) for a full notch
-
-      // Notch centers. 0.5 = a single half-width notch at angle 0.
-      const centers = [];
-      let halfNotch = false;
-      if(notchCount === 0.5){
-        centers.push(0);
-        halfNotch = true;
-      } else if(notchCount > 0){
-        for(let i = 0; i < notchCount; i++){
-          centers.push((i / notchCount) * Math.PI * 2);
-        }
+      // Safety clamp: never let a notch exceed 92% of the spacing between positions
+      // (prevents adjacent notches from merging visually).
+      function clamp(width, positionCount){
+        const maxAllowed = (Math.PI * 2 / positionCount) * 0.92;
+        return Math.min(width, maxAllowed);
       }
-      const effectiveWidth = halfNotch ? notchAngularWidth * 0.5 : notchAngularWidth;
-      const halfW = effectiveWidth / 2;
 
-      // True if angle `a` is inside any notch (shortest-arc distance < halfW)
+      if(notchCount === 0.5){
+        return [{ angle: 0, width: baseAngular * 0.5 }];
+      }
+
+      if(notchCount <= 6){
+        const out = [];
+        for(let i = 0; i < notchCount; i++){
+          out.push({
+            angle: (i / notchCount) * Math.PI * 2,
+            width: clamp(baseAngular, notchCount),
+          });
+        }
+        return out;
+      }
+
+      // 7+ : six fixed positions, distribute extra base units across them
+      const q = Math.floor(notchCount / 6);
+      const r = notchCount - q * 6;
+      const out = [];
+      for(let i = 0; i < 6; i++){
+        const units = (i < r ? q + 1 : q);
+        out.push({
+          angle: (i / 6) * Math.PI * 2,
+          width: clamp(units * baseAngular, 6),
+        });
+      }
+      return out;
+    }
+
+    function makeShimShape(outerR, innerR, notches){
+      const shape = new THREE.Shape();
+      const SEGMENTS = 512;
+
+      // Notch depth scales with outer radius so it reads consistently across sizes
+      const notchDepth = outerR * 0.06;
+
+      // True if angle `a` is inside any notch (each notch carries its own width)
       function inNotch(a){
-        for(const c of centers){
-          let d = a - c;
+        for(const n of notches){
+          let d = a - n.angle;
           d = Math.atan2(Math.sin(d), Math.cos(d));
-          if(Math.abs(d) < halfW) return true;
+          if(Math.abs(d) < n.width / 2) return true;
         }
         return false;
       }
@@ -908,7 +942,8 @@
       const innerR = (idMM / 2) * scale;
       const depth  = thicknessMM * scale;
 
-      const shape = makeShimShape(outerR, innerR, notchCount);
+      const notches = computeNotches(notchCount, odMM);
+      const shape = makeShimShape(outerR, innerR, notches);
       const geometry = new THREE.ExtrudeGeometry(shape, {
         depth: depth,
         bevelEnabled: true,
