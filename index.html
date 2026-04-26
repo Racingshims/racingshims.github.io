@@ -117,16 +117,16 @@
     display:grid;grid-template-columns:1.05fr 1fr;background:var(--paper);
   }
   @media (max-width:900px){ .config{grid-template-columns:1fr} }
-  .config-left{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:18px;order:1}
+  .config-left{padding:36px;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;gap:18px;order:2}
   .config-left .label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;opacity:.7}
   .config-left .price{font-family:'Barlow Condensed';font-style:italic;font-weight:900;font-size:clamp(56px,8vw,96px);line-height:.9}
 
   /* 3D shim viewer */
   .shim-viewer{
     position:relative;width:100%;aspect-ratio:16/11;max-height:280px;
-    background:radial-gradient(ellipse at center, #1a1a1a 0%, #000 75%);
+    background:radial-gradient(ellipse at center, #ffffff 0%, #d4d4d8 85%);
     border-radius:14px;overflow:hidden;cursor:grab;
-    border:1px solid rgba(255,255,255,.08);
+    border:1px solid rgba(0,0,0,.08);
   }
   .shim-viewer:active{cursor:grabbing}
   .shim-viewer canvas{display:block;width:100%!important;height:100%!important}
@@ -140,10 +140,14 @@
   }
   .config-left .price small{font-size:.35em;opacity:.55;letter-spacing:.04em;margin-left:8px;font-style:normal;font-family:'Inter';font-weight:600}
   .config-left .summary{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;font-size:14px;margin-top:10px}
-  .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .config-left .summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.08)}
   .config-left .summary strong{font-weight:600}
-  .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
-  .config-right{padding:36px;display:flex;flex-direction:column;gap:22px;order:2}
+  .config-left .note{font-size:12px;opacity:.55;margin-top:auto;padding-top:16px;border-top:1px solid rgba(0,0,0,.08)}
+  .config-right{padding:36px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;gap:22px;order:1}
+  .config-right .field label{color:rgba(255,255,255,.6)}
+  .config-right .bulk-hint{color:rgba(255,255,255,.55)}
+  .config-right .add-btn{background:var(--paper);color:var(--ink)}
+  .config-right select:focus, .config-right input:focus{box-shadow:0 0 0 3px rgba(255,255,255,.18)}
 
   .field label{display:block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--steel);margin-bottom:10px}
 
