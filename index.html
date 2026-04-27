@@ -553,6 +553,9 @@
       btn.setAttribute('aria-pressed','true');
       shape = btn.dataset.shape;
       applyShape();
+      // Bleed restricts the OD lineup — repopulate OD (and therefore thickness) on shape change
+      populateSelect('odSel');
+      populateSelect('thSel');
       computePrice();
     });
   });
@@ -561,6 +564,8 @@
   // Unit toggle — canonical value is always mm; display text switches to inches when imperial.
   // Metric is intentionally "coming soon" across the board for now (null mmDisp = filtered out in metric mode).
   let unit = 'imperial';
+  // Bleed shims only ship in 0.870", 1.200", 1.350" (locked 2026-04-27)
+  const BLEED_ODS_MM = [22.098, 30.480, 34.290];
   const DIMS = {
     idSel: {
       placeholder: 'Choose ID',
@@ -614,6 +619,10 @@
       // OD depends on which ID is currently selected
       const currentID = document.getElementById('idSel').value;
       rows = (currentID && cfg.rowsByID[currentID]) ? cfg.rowsByID[currentID] : [];
+      // Bleed shims only ship in three ODs (0.870", 1.200", 1.350")
+      if(shape === 'bleed'){
+        rows = rows.filter(r => BLEED_ODS_MM.some(od => Math.abs(od - r.mm) < 1e-6));
+      }
     } else if(id === 'thSel'){
       // Some thicknesses are restricted to specific ODs (via `onlyForOD`)
       const currentOD = parseFloat(document.getElementById('odSel').value);
