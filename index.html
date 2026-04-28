@@ -623,12 +623,17 @@
         rows = rows.filter(r => BLEED_ODS_MM.some(od => Math.abs(od - r.mm) < 1e-6));
       }
     } else if(id === 'thSel'){
-      // Some thicknesses are restricted to specific ODs (via `onlyForOD`)
-      const currentOD = parseFloat(document.getElementById('odSel').value);
-      rows = cfg.rows.filter(r => {
-        if(!r.onlyForOD) return true;
-        return currentOD && r.onlyForOD.some(od => Math.abs(od - currentOD) < 1e-6);
-      });
+      // Bleed shims only available in 0.006" thickness (locked 2026-04-28).
+      // Otherwise some thicknesses are restricted to specific ODs (via `onlyForOD`).
+      if(shape === 'bleed'){
+        rows = cfg.rows.filter(r => Math.abs(r.mm - 0.1524) < 1e-6);
+      } else {
+        const currentOD = parseFloat(document.getElementById('odSel').value);
+        rows = cfg.rows.filter(r => {
+          if(!r.onlyForOD) return true;
+          return currentOD && r.onlyForOD.some(od => Math.abs(od - currentOD) < 1e-6);
+        });
+      }
     } else {
       rows = cfg.rows;
     }
