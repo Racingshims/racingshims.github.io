@@ -534,9 +534,13 @@
   function populateNotches(){
     const sel = document.getElementById('notchSel');
     const prev = sel.value;
+    // 0.870" OD bleed shims only support notch counts 1–6 (locked 2026-04-28)
+    const od = parseFloat(document.getElementById('odSel').value);
+    const isOD870 = od && Math.abs(od - 22.098) < 1e-6;
+    const opts = isOD870 ? [1, 2, 3, 4, 5, 6] : NOTCH_OPTIONS;
     sel.innerHTML = '<option value="">Choose notch count</option>' +
-      NOTCH_OPTIONS.map(n=>'<option value="'+n+'">'+fmtNotch(n)+'</option>').join('');
-    if(prev) sel.value = prev;
+      opts.map(n=>'<option value="'+n+'">'+fmtNotch(n)+'</option>').join('');
+    if(prev && opts.some(n => String(n) === prev)) sel.value = prev;
   }
   populateNotches();
   function applyShape(){
@@ -552,9 +556,10 @@
       btn.setAttribute('aria-pressed','true');
       shape = btn.dataset.shape;
       applyShape();
-      // Bleed restricts the OD lineup — repopulate OD (and therefore thickness) on shape change
+      // Bleed restricts the OD lineup — repopulate OD (and therefore thickness + notches) on shape change
       populateSelect('odSel');
       populateSelect('thSel');
+      populateNotches();
       computePrice();
     });
   });
@@ -683,9 +688,10 @@
     populateSelect('thSel');
     computePrice();
   });
-  // OD drives which thicknesses are available (e.g. 0.030" only with 0.433" / 0.620")
+  // OD drives which thicknesses + bleed notch counts are available (e.g. 0.030" only with 0.433" / 0.620"; 0.870" bleed = notches 1–6 only)
   document.getElementById('odSel').addEventListener('change', ()=>{
     populateSelect('thSel');
+    populateNotches();
     computePrice();
   });
 
